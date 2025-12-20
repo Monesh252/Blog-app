@@ -96,6 +96,45 @@ public class PostService {
         }
     }
 
+    public Page<Post> searchWithAuthors(String type, String keyword,
+                                        List<Long> authorIds,
+                                        int page, int size,
+                                        String sortBy) {
+
+        Sort sort;
+
+        switch (sortBy) {
+            case "oldest":
+                sort = Sort.by("publishedAt").ascending();
+                break;
+            case "title":
+                sort = Sort.by("title").ascending();
+                break;
+            case "author":
+                sort = Sort.by("author.name").ascending();
+                break;
+            default:
+                sort = Sort.by("publishedAt").descending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        switch (type) {
+
+            case "content":
+                return postRepository.findByAuthorIdInAndContentContainingIgnoreCase(
+                        authorIds, keyword, pageable);
+
+            case "tags":
+                return postRepository.findDistinctByAuthorIdInAndTags_NameContainingIgnoreCase(
+                        authorIds, keyword, pageable);
+
+            default: // title + author
+                return postRepository.findByAuthorIdInAndTitleContainingIgnoreCase(
+                        authorIds, keyword, pageable);
+        }
+    }
+
 
     public void delete(Long id){
         postRepository.deleteById(id);

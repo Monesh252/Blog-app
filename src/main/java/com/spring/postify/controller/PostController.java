@@ -7,12 +7,15 @@ import com.spring.postify.service.PostService;
 import com.spring.postify.service.TagService;
 import com.spring.postify.service.UserService;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -139,12 +142,19 @@ public class PostController {
     public String searchResult(
             @RequestParam String type,
             @RequestParam String keyword,
-            @RequestParam(defaultValue = "latest") String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(required = false) List<Long> authorIds,
             Model model) {
 
-        Page<Post> result = postService.search(type, keyword, page, size, sortBy);
+        Page<Post> result;
+
+        if(authorIds != null && !authorIds.isEmpty()){
+            result = postService.searchWithAuthors(type, keyword, authorIds, page, size, sortBy);
+        } else {
+            result = postService.search(type, keyword, page, size, sortBy);
+        }
 
         model.addAttribute("posts", result.getContent());
         model.addAttribute("currentPage", page);
@@ -153,6 +163,7 @@ public class PostController {
         model.addAttribute("type", type);
         model.addAttribute("keyword", keyword);
         model.addAttribute("sortBy", sortBy);
+        model.addAttribute("selectedAuthors", authorIds);
 
         return "posts/list";
     }

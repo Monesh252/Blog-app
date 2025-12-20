@@ -1,19 +1,16 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Blog Posts</title>
-
     <link rel="stylesheet" th:href="@{/css/list.css}">
 </head>
-
 <body>
 
 <div class="container">
 
-    <!-- HEADER -->
     <div class="header">
-
         <div class="left">
             <a href="/posts/create" class="create-btn">+ Create Post</a>
         </div>
@@ -25,15 +22,10 @@
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
         </div>
-
     </div>
 
-    <!-- SEARCH + SORT -->
     <div class="search-area">
-
         <form method="get" action="/posts/search" class="search-form">
-
-            <!-- TYPE -->
             <select name="type" class="search-type">
                 <option value="title"   th:selected="${type=='title'}">Title</option>
                 <option value="content" th:selected="${type=='content'}">Content</option>
@@ -41,100 +33,153 @@
                 <option value="tags"    th:selected="${type=='tags'}">Tags</option>
             </select>
 
-            <!-- KEYWORD -->
-            <input type="text"
-                   name="keyword"
-                   class="search-input"
-                   placeholder="Search posts..."
-                   th:value="${keyword}">
-
+            <input type="text" name="keyword" class="search-input"
+                   placeholder="Search posts..." th:value="${keyword}">
             <button type="submit" class="search-btn">Search</button>
-
+            <a href="/posts" class="search-btn">Reset</a>
         </form>
-
     </div>
 
-    <div class="sort-area">
-
+    <div class="sort-bar">
         <form method="get" action="/posts/search" id="sortForm">
 
             <input type="hidden" name="type" th:value="${type}">
             <input type="hidden" name="keyword" th:value="${keyword}">
+            <input type="hidden" name="fromDate" th:value="${fromDate}">
+            <input type="hidden" name="toDate" th:value="${toDate}">
             <input type="hidden" name="page" value="0">
             <input type="hidden" name="size" th:value="${size}">
 
-            <label style="margin-right:8px;">Sort By:</label>
+            <div th:each="a : ${selectedAuthors}">
+                <input type="hidden" name="authorIds" th:value="${a}">
+            </div>
 
-            <select name="sortBy" class="sort-select" onchange="document.getElementById('sortForm').submit()">
+            <label>Sort</label>
+            <select name="sortBy" class="sort-select"
+                    onchange="this.form.submit()">
                 <option value="latest" th:selected="${sortBy=='latest'}">Latest First</option>
                 <option value="oldest" th:selected="${sortBy=='oldest'}">Oldest First</option>
-                <option value="title"  th:selected="${sortBy=='title'}">Title (A → Z)</option>
+                <option value="title"  th:selected="${sortBy=='title'}">Title</option>
                 <option value="author" th:selected="${sortBy=='author'}">Author</option>
             </select>
-
         </form>
-
     </div>
 
-    <br>
+    <div class="layout">
+
+        <aside class="filter-panel">
+            <form method="get" action="/posts/search">
+
+                <h3>Filters</h3>
+
+                <label>Author</label>
+
+                <div class="author-box">
+                    <div class="author-item" th:each="a : ${authors}">
+                        <input type="checkbox"
+                               name="authorIds"
+                               th:id="'a' + ${a.id}"
+                               th:value="${a.id}"
+                               th:checked="${selectedAuthors != null and selectedAuthors.contains(a.id)}">
+
+                        <label th:for="'a' + ${a.id}" th:text="${a.name}"></label>
+                    </div>
+                </div>
 
 
-    <!-- EMPTY -->
-    <div th:if="${#lists.isEmpty(posts)}" class="alert">
-        No posts available.
+                <label>From Date</label>
+                <input type="date" name="fromDate" th:value="${fromDate}">
+
+                <label>To Date</label>
+                <input type="date" name="toDate" th:value="${toDate}">
+
+                <input type="hidden" name="sortBy" th:value="${sortBy}">
+                <input type="hidden" name="type" th:value="${type}">
+                <input type="hidden" name="keyword" th:value="${keyword}">
+                <button type="submit">Apply</button>
+            </form>
+        </aside>
+
+        <div class="content-area">
+
+            <div th:if="${#lists.isEmpty(posts)}" class="alert">
+                No posts available.
+            </div>
+
+            <section class="grid">
+                <article class="card" th:each="post : ${posts}">
+                    <div class="card-header">
+                        <h2 th:text="${post.title}"></h2>
+                        <small class="meta">
+                            <span th:text="${post.author != null ? post.author.name : 'Unknown'}"></span>
+                            •
+                            <span th:text="${#temporals.format(post.publishedAt, 'dd MMM yyyy • HH:mm')}"></span>
+                        </small>
+                    </div>
+
+                    <p class="excerpt" th:text="${post.excerpt}"></p>
+
+                    <div class="card-actions">
+                        <a th:href="@{'/posts/' + ${post.id}}" class="btn view">View</a>
+                        <a th:href="@{'/posts/edit/' + ${post.id}}" class="btn edit">Edit</a>
+                        <a th:href="@{'/posts/delete/' + ${post.id}}"
+                           onclick="return confirm('Are you sure?');"
+                           class="btn delete">Delete</a>
+                    </div>
+                </article>
+            </section>
+
+            <nav class="pagination" th:if="${totalPages > 1}">
+                <a class="page-btn"
+                   th:classappend="${currentPage == 0} ? 'disabled'"
+                   th:href="@{/posts/search(
+                        type=${type},
+                        keyword=${keyword},
+                        sortBy=${sortBy},
+                        page=${currentPage-1},
+                        size=${size},
+                        authorIds=${selectedAuthors},
+                        fromDate=${fromDate},
+                        toDate=${toDate}
+                )}">
+                    Previous
+                </a>
+
+                <a class="page-number"
+                   th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                   th:text="${i+1}"
+                   th:classappend="${i == currentPage} ? 'active'"
+                   th:href="@{/posts/search(
+                        type=${type},
+                        keyword=${keyword},
+                        sortBy=${sortBy},
+                        page=${i},
+                        size=${size},
+                        authorIds=${selectedAuthors},
+                        fromDate=${fromDate},
+                        toDate=${toDate}
+                )}">
+                </a>
+
+                <a class="page-btn"
+                   th:classappend="${currentPage + 1 == totalPages} ? 'disabled'"
+                   th:href="@{/posts/search(
+                        type=${type},
+                        keyword=${keyword},
+                        sortBy=${sortBy},
+                        page=${currentPage+1},
+                        size=${size},
+                        authorIds=${selectedAuthors},
+                        fromDate=${fromDate},
+                        toDate=${toDate}
+                )}">
+                    Next
+                </a>
+            </nav>
+
+        </div>
+
     </div>
-
-
-    <section class="grid">
-
-        <article class="card" th:each="post : ${posts}">
-
-            <div class="card-header">
-                <h2 th:text="${post.title}"></h2>
-
-                <small class="meta">
-                    <span th:text="${post.author != null ? post.author.name : 'Unknown'}"></span>
-                    •
-                    <span th:text="${#temporals.format(post.publishedAt, 'dd MMM yyyy • HH:mm')}"></span>
-                </small>
-            </div>
-
-            <p class="excerpt" th:text="${post.excerpt}"></p>
-
-            <div class="card-actions">
-                <a th:href="@{'/posts/' + ${post.id}}" class="btn view">View</a>
-                <a th:href="@{'/posts/edit/' + ${post.id}}" class="btn edit">Edit</a>
-                <a th:href="@{'/posts/delete/' + ${post.id}}"
-                   onclick="return confirm('Are you sure?');"
-                   class="btn delete">Delete</a>
-            </div>
-
-        </article>
-
-    </section>
-
-    <nav class="pagination" th:if="${totalPages > 1}">
-
-        <a class="page-btn"
-           th:classappend="${currentPage == 0} ? 'disabled'"
-           th:href="@{|/posts/search?type=${type}&keyword=${keyword}&sortBy=${sortBy}&page=${currentPage-1}&size=${size}|}">
-            Previous
-        </a>
-
-        <a class="page-number"
-           th:each="i : ${#numbers.sequence(0, totalPages-1)}"
-           th:text="${i+1}"
-           th:classappend="${i == currentPage} ? 'active'"
-           th:href="@{|/posts/search?type=${type}&keyword=${keyword}&sortBy=${sortBy}&page=${i}&size=${size}|}">
-        </a>
-
-        <a class="page-btn"
-           th:classappend="${currentPage + 1 == totalPages} ? 'disabled'"
-           th:href="@{|/posts/search?type=${type}&keyword=${keyword}&sortBy=${sortBy}&page=${currentPage+1}&size=${size}|}">
-            Next
-        </a>
-
-    </nav>
 
 </div>
 
