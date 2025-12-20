@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -17,19 +18,18 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByTags_NameContainingIgnoreCase(String keyword, Pageable pageable);
 
-    Page<Post> findByAuthorIdInAndTitleContainingIgnoreCase(
-            List<Long> authorIds,
-            String keyword,
-            Pageable pageable);
+    Page<Post> findByTitleContainingIgnoreCaseAndPublishedAtBetween(
+            String title, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
 
-    Page<Post> findByAuthorIdInAndContentContainingIgnoreCase(
-            List<Long> authorIds,
-            String keyword,
-            Pageable pageable);
+    // Content search with date range
+    Page<Post> findByContentContainingIgnoreCaseAndPublishedAtBetween(
+            String content, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
 
-    Page<Post> findDistinctByAuthorIdInAndTags_NameContainingIgnoreCase(
-            List<Long> authorIds,
-            String keyword,
-            Pageable pageable);
+    // Author search with date range
+    Page<Post> findByAuthor_NameContainingIgnoreCaseAndPublishedAtBetween(
+            String authorName, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
 
+    // Tags search with date range
+    Page<Post> findByTags_NameContainingIgnoreCaseAndPublishedAtBetween(
+            String tagName, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
 }

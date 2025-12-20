@@ -36,7 +36,7 @@
             <input type="text" name="keyword" class="search-input"
                    placeholder="Search posts..." th:value="${keyword}">
             <button type="submit" class="search-btn">Search</button>
-            <a href="/posts" class="search-btn">Reset</a>
+            <a href="search?type=title&keyword=" class="search-btn">Reset</a>
         </form>
     </div>
 
@@ -132,16 +132,7 @@
             <nav class="pagination" th:if="${totalPages > 1}">
                 <a class="page-btn"
                    th:classappend="${currentPage == 0} ? 'disabled'"
-                   th:href="@{/posts/search(
-                        type=${type},
-                        keyword=${keyword},
-                        sortBy=${sortBy},
-                        page=${currentPage-1},
-                        size=${size},
-                        authorIds=${selectedAuthors},
-                        fromDate=${fromDate},
-                        toDate=${toDate}
-                )}">
+                   th:href="@{|/posts/search?page=${currentPage-1}&size=${size}&type=${type}&keyword=${keyword}&sortBy=${sortBy}&fromDate=${fromDate}&toDate=${toDate}&authorIds=${selectedAuthors}|}">
                     Previous
                 </a>
 
@@ -149,30 +140,12 @@
                    th:each="i : ${#numbers.sequence(0, totalPages-1)}"
                    th:text="${i+1}"
                    th:classappend="${i == currentPage} ? 'active'"
-                   th:href="@{/posts/search(
-                        type=${type},
-                        keyword=${keyword},
-                        sortBy=${sortBy},
-                        page=${i},
-                        size=${size},
-                        authorIds=${selectedAuthors},
-                        fromDate=${fromDate},
-                        toDate=${toDate}
-                )}">
+                   th:href="@{|/posts/search?page=${i}&size=${size}&type=${type}&keyword=${keyword}&sortBy=${sortBy}&fromDate=${fromDate}&toDate=${toDate}&authorIds=${selectedAuthors}|}">
                 </a>
 
                 <a class="page-btn"
                    th:classappend="${currentPage + 1 == totalPages} ? 'disabled'"
-                   th:href="@{/posts/search(
-                        type=${type},
-                        keyword=${keyword},
-                        sortBy=${sortBy},
-                        page=${currentPage+1},
-                        size=${size},
-                        authorIds=${selectedAuthors},
-                        fromDate=${fromDate},
-                        toDate=${toDate}
-                )}">
+                   th:href="@{|/posts/search?page=${currentPage+1}&size=${size}&type=${type}&keyword=${keyword}&sortBy=${sortBy}&fromDate=${fromDate}&toDate=${toDate}&authorIds=${selectedAuthors}|}">
                     Next
                 </a>
             </nav>

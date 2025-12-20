@@ -53,7 +53,9 @@ public class PostService {
                              String keyword,
                              int page,
                              int size,
-                             String sortBy){
+                             String sortBy,
+                             LocalDateTime fromDate,
+                             LocalDateTime toDate){
 
         Sort sort;
 
@@ -76,62 +78,30 @@ public class PostService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        switch (type){
-
-            case "content":
-                return postRepository
-                        .findByContentContainingIgnoreCase(keyword, pageable);
-
-            case "author":
-                return postRepository
-                        .findByAuthor_NameContainingIgnoreCase(keyword, pageable);
-
-            case "tags":
-                return postRepository
-                        .findByTags_NameContainingIgnoreCase(keyword, pageable);
-
-            default: // title
-                return postRepository
-                        .findByTitleContainingIgnoreCase(keyword, pageable);
+        if (fromDate == null) {
+            fromDate = LocalDateTime.of(1970, 1, 1, 0, 0); // or earliest possible
         }
-    }
-
-    public Page<Post> searchWithAuthors(String type, String keyword,
-                                        List<Long> authorIds,
-                                        int page, int size,
-                                        String sortBy) {
-
-        Sort sort;
-
-        switch (sortBy) {
-            case "oldest":
-                sort = Sort.by("publishedAt").ascending();
-                break;
-            case "title":
-                sort = Sort.by("title").ascending();
-                break;
-            case "author":
-                sort = Sort.by("author.name").ascending();
-                break;
-            default:
-                sort = Sort.by("publishedAt").descending();
+        if (toDate == null) {
+            toDate = LocalDateTime.now().plusYears(100); // or far future
         }
-
-        Pageable pageable = PageRequest.of(page, size, sort);
 
         switch (type) {
-
             case "content":
-                return postRepository.findByAuthorIdInAndContentContainingIgnoreCase(
-                        authorIds, keyword, pageable);
-
+                return postRepository
+                        .findByContentContainingIgnoreCaseAndPublishedAtBetween(
+                                keyword, fromDate, toDate, pageable);
+            case "author":
+                return postRepository
+                        .findByAuthor_NameContainingIgnoreCaseAndPublishedAtBetween(
+                                keyword, fromDate, toDate, pageable);
             case "tags":
-                return postRepository.findDistinctByAuthorIdInAndTags_NameContainingIgnoreCase(
-                        authorIds, keyword, pageable);
-
-            default: // title + author
-                return postRepository.findByAuthorIdInAndTitleContainingIgnoreCase(
-                        authorIds, keyword, pageable);
+                return postRepository
+                        .findByTags_NameContainingIgnoreCaseAndPublishedAtBetween(
+                                keyword, fromDate, toDate, pageable);
+            default: // title
+                return postRepository
+                        .findByTitleContainingIgnoreCaseAndPublishedAtBetween(
+                                keyword, fromDate, toDate, pageable);
         }
     }
 

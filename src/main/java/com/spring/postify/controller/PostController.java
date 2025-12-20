@@ -7,15 +7,17 @@ import com.spring.postify.service.PostService;
 import com.spring.postify.service.TagService;
 import com.spring.postify.service.UserService;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,13 +73,22 @@ public class PostController {
     public String save(@ModelAttribute Post post,
                        @RequestParam(required = false) String tagsInput){
         post.setAuthor(userService.getUser(3L));
+
+        Set<Tag> tags = new HashSet<>();
         if (tagsInput != null && !tagsInput.isBlank()) {
 
-            Set<Tag> tags = Arrays.stream(tagsInput.split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .map(tagService::getOrCreateTag)
-                    .collect(Collectors.toSet());
+            String[] splitTags = tagsInput.split("#");
+
+            for (String t : splitTags) {
+                t = t.trim();
+                if (t != null) {
+                    String trimmed = t.trim();
+                    if (!trimmed.isEmpty()) {
+                        Tag tag = tagService.getOrCreateTag(trimmed);
+                        tags.add(tag);
+                    }
+                }
+            }
 
             post.setTags(tags);
 
@@ -111,11 +122,17 @@ public class PostController {
 
         if (tagsInput != null && !tagsInput.isBlank()) {
 
-            tags = Arrays.stream(tagsInput.split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .map(tagService::getOrCreateTag)
-                    .collect(Collectors.toSet());
+            String[] splitTags = tagsInput.split("#");
+
+            for (String t : splitTags) {
+                if (t != null) {
+                    String trimmed = t.trim();
+                    if (!trimmed.isEmpty()) {
+                        Tag tag = tagService.getOrCreateTag(trimmed);
+                        tags.add(tag);
+                    }
+                }
+            }
         }
 
         post.setTags(tags);
@@ -142,19 +159,43 @@ public class PostController {
     public String searchResult(
             @RequestParam String type,
             @RequestParam String keyword,
+            @RequestParam(defaultValue = "latest") String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "latest") String sortBy,
-            @RequestParam(required = false) List<Long> authorIds,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
             Model model) {
 
-        Page<Post> result;
+        LocalDateTime from = null;
+        LocalDateTime to = null;
 
-        if(authorIds != null && !authorIds.isEmpty()){
-            result = postService.searchWithAuthors(type, keyword, authorIds, page, size, sortBy);
-        } else {
-            result = postService.search(type, keyword, page, size, sortBy);
+        if (fromDate != null && !fromDate.trim().isEmpty() && !fromDate.equalsIgnoreCase("null")) {
+            try {
+                from = LocalDateTime.parse(fromDate);
+            } catch (DateTimeParseException e) {
+                try {
+                    from = LocalDate.parse(fromDate).atStartOfDay();
+                } catch (DateTimeParseException e2) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Invalid fromDate format. Use yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss");
+                }
+            }
         }
+
+        if (toDate != null && !toDate.trim().isEmpty() && !toDate.equalsIgnoreCase("null")) {
+            try {
+                to = LocalDateTime.parse(toDate);
+            } catch (DateTimeParseException e) {
+                try {
+                    to = LocalDate.parse(toDate).atTime(LocalTime.MAX);
+                } catch (DateTimeParseException e2) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Invalid toDate format. Use yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss");
+                }
+            }
+        }
+
+        Page<Post> result = postService.search(type, keyword, page, size, sortBy, from, to);
 
         model.addAttribute("posts", result.getContent());
         model.addAttribute("currentPage", page);
@@ -163,7 +204,6 @@ public class PostController {
         model.addAttribute("type", type);
         model.addAttribute("keyword", keyword);
         model.addAttribute("sortBy", sortBy);
-        model.addAttribute("selectedAuthors", authorIds);
 
         return "posts/list";
     }
