@@ -2,6 +2,7 @@ package com.spring.postify.controller;
 
 import com.spring.postify.entity.Post;
 import com.spring.postify.entity.Tag;
+import com.spring.postify.entity.User;
 import com.spring.postify.service.CommentService;
 import com.spring.postify.service.PostService;
 import com.spring.postify.service.TagService;
@@ -17,7 +18,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,7 +48,11 @@ public class PostController {
             Model model) {
 
         Page<Post> postPage = postService.getPosts(page, size);
+        List<User> authors = postService.getDistinctAuthorDetails();
+        System.out.println("Number of authors found: " + authors.size());
 
+
+        model.addAttribute("authors", authors);
         model.addAttribute("posts", postPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", postPage.getTotalPages());
@@ -72,7 +79,7 @@ public class PostController {
     @PostMapping
     public String save(@ModelAttribute Post post,
                        @RequestParam(required = false) String tagsInput){
-        post.setAuthor(userService.getUser(3L));
+        post.setAuthor(userService.getUser(17L));
 
         Set<Tag> tags = new HashSet<>();
         if (tagsInput != null && !tagsInput.isBlank()) {
@@ -103,10 +110,20 @@ public class PostController {
         Post post = postService.getPost(id);
         model.addAttribute("post", post);
 
-        String existingTags = post.getTags()
-                .stream()
-                .map(Tag::getName)
-                .collect(Collectors.joining(", "));
+        String existingTags = "";
+        if (post.getTags() != null && !post.getTags().isEmpty()) {
+
+            StringBuilder sb = new StringBuilder();
+
+            for (Tag tag : post.getTags()) {
+                if (tag != null && tag.getName() != null) {
+                    sb.append("#").append(tag.getName()).append(" ");
+                }
+            }
+
+            existingTags = sb.toString().trim();
+        }
+
 
         model.addAttribute("tagsInput", existingTags);
 
@@ -164,6 +181,7 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate,
+            @RequestParam(required = false) String[] authorIds,
             Model model) {
 
         LocalDateTime from = null;
@@ -195,8 +213,25 @@ public class PostController {
             }
         }
 
-        Page<Post> result = postService.search(type, keyword, page, size, sortBy, from, to);
+        List<User> authors = postService.getDistinctAuthorDetails();
 
+        List<Long> selectedAuthorIds = new ArrayList<>();
+        if (authorIds != null && authorIds.length > 0) {
+            for (String id : authorIds) {
+                if (id != null && !id.trim().isEmpty() && !id.equals("null")) {
+                    try {
+                        selectedAuthorIds.add(Long.parseLong(id));
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            }
+        }
+
+        Page<Post> result = postService.search(type, keyword, page, size, sortBy, from, to,
+                            selectedAuthorIds.isEmpty() ? null : selectedAuthorIds);
+
+        model.addAttribute("selectedAuthors", selectedAuthorIds);
+        model.addAttribute("authors",authors);
         model.addAttribute("posts", result.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", result.getTotalPages());
