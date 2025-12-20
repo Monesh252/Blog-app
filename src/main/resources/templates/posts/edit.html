@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Post</title>
+
+    <link rel="stylesheet" th:href="@{/css/edit.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <h1>Edit Post</h1>
+        <a href="/posts" class="back-btn">Back</a>
+    </header>
+
+    <div class="form-card">
+
+        <form th:action="@{'/posts/update/' + ${post.id}}" method="post" th:object="${post}">
+
+            <div class="field">
+                <label>Title</label>
+                <input th:field="*{title}">
+            </div>
+
+            <div class="field">
+                <label>Excerpt</label>
+                <input th:field="*{excerpt}">
+            </div>
+
+            <div class="field">
+                <label>Tags (comma separated)</label>
+                <input type="text"
+                       name="tagsInput"
+                       th:value="${tagsInput}"
+                       placeholder="java, spring boot, backend">
+            </div>
+
+            <div class="field">
+                <label>Content</label>
+                <textarea rows="6" th:field="*{content}"></textarea>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="save-btn">Update</button>
+                <a href="/posts" class="cancel-btn">Cancel</a>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

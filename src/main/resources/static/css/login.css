@@ -1,0 +1,91 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",Roboto,Arial;
+}
+
+body{
+    background:#ffffff;
+    color:#000000;
+    min-height:100vh;
+}
+
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.login-card{
+    width:380px;
+    padding:30px;
+    border-radius:8px;
+    background:#ffffff;
+    border:1px solid #000000;
+    text-align:center;
+}
+
+.login-card h1{
+    color:#000000;
+    margin-bottom:20px;
+}
+
+.field{
+    text-align:left;
+    margin-bottom:15px;
+}
+
+label{
+    color:#000000;
+    font-weight:600;
+    margin-bottom:5px;
+    display:block;
+}
+
+input{
+    width:100%;
+    background:#ffffff;
+    border:1px solid #000000;
+    color:#000000;
+    padding:10px;
+    border-radius:6px;
+    outline:none;
+}
+
+input::placeholder{
+    color:#777;
+}
+
+.login-btn{
+    width:100%;
+    background:#000000;
+    color:white;
+    border:1px solid #000000;
+    padding:10px;
+    border-radius:6px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.divider{
+    margin:18px 0;
+    border-top:1px solid #000000;
+}
+
+.no-account{
+    color:#000000;
+    margin-bottom:8px;
+}
+
+.create-btn{
+    display:inline-block;
+    background:#ffffff;
+    color:#000000;
+    padding:8px 14px;
+    border-radius:6px;
+    font-weight:700;
+    text-decoration:none;
+    border:1px solid #000000;
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Created</title>
+
+    <link rel="stylesheet" th:href="@{/css/user-created.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>User Created Successfully!</h1>
+
+        <p th:text="'User: ' + ${user.name} + ' has been created.'"></p>
+
+        <div class="actions">
+            <a href="/" class="btn primary">Go to Login</a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",Roboto,Arial;
+}
+
+body{
+    background:#ffffff;
+    color:#000000;
+    min-height:100vh;
+}
+
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.user-card{
+    width:420px;
+    padding:30px;
+    border-radius:8px;
+    background:#ffffff;
+    border:1px solid #000000;
+    text-align:center;
+}
+
+.user-card h1{
+    color:#000000;
+    margin-bottom:20px;
+}
+
+.field{
+    text-align:left;
+    margin-bottom:15px;
+}
+
+label{
+    color:#000000;
+    font-weight:600;
+    margin-bottom:5px;
+    display:block;
+}
+
+input{
+    width:100%;
+    background:#ffffff;
+    border:1px solid #000000;
+    color:#000000;
+    padding:10px;
+    border-radius:6px;
+    outline:none;
+}
+
+input::placeholder{
+    color:#777;
+}
+
+.actions{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+}
+
+.save-btn{
+    flex:1;
+    background:#000000;
+    color:#ffffff;
+    border:1px solid #000000;
+    padding:10px;
+    border-radius:6px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.back-btn{
+    flex:1;
+    text-align:center;
+    background:#ffffff;
+    color:#000000;
+    border:1px solid #000000;
+    padding:10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:700;
+}

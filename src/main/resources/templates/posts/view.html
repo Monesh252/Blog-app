@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">Post</title>
+
+    <link rel="stylesheet" th:href="@{/css/view.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <h1 th:text="${post.title}"></h1>
+
+        <div class="top-actions">
+            <a href="/posts" class="back-btn">Back</a>
+            <a th:href="@{'/posts/edit/' + ${post.id}}" class="edit-btn">Edit</a>
+            <a th:href="@{'/posts/delete/' + ${post.id}}"
+               onclick="return confirm('Delete Post?');"
+               class="delete-btn">
+                Delete
+            </a>
+        </div>
+    </header>
+
+
+    <!-- POST CARD -->
+    <div class="post-card">
+
+        <div class="meta">
+            Author:
+            <span th:text="${post.author != null ? post.author.name : 'Unknown'}"></span>
+            •
+            Published:
+            <span th:text="${#temporals.format(post.publishedAt,'dd MMM yyyy HH:mm')}"></span>
+        </div>
+
+        <p class="content" th:text="${post.content}"></p>
+
+    </div>
+
+
+    <!-- ADD COMMENT -->
+    <section class="add-comment">
+        <h3>Add Comment</h3>
+
+        <form method="post" action="/comments/add">
+
+            <input type="hidden" name="postId" th:value="${post.id}">
+
+            <div class="field">
+                <label>Name</label>
+                <input name="name">
+            </div>
+
+            <div class="field">
+                <label>Email</label>
+                <input name="email">
+            </div>
+
+            <div class="field">
+                <label>Comment</label>
+                <textarea name="comment"></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit</button>
+
+        </form>
+    </section>
+
+    <br>
+
+    <!-- COMMENTS SECTION -->
+    <section class="comments" id="comment">
+
+        <h2>Comments</h2>
+
+        <div th:if="${#lists.isEmpty(comments)}" class="no-comments">
+            No comments yet.
+        </div>
+
+        <div th:each="c : ${comments}" class="comment-card">
+
+            <div class="comment-head">
+                <b th:text="${c.name}"></b>
+                <span class="email" th:text="'(' + ${c.email} + ')'"></span>
+            </div>
+
+            <p th:text="${c.comment}"></p>
+
+            <div class="comment-actions">
+                <a th:href="@{'/comments/edit/' + ${c.id}}" class="edit-btn-sm">Edit</a>
+                <a th:href="@{'/comments/delete/' + ${c.id}}"
+                   onclick="return confirm('Delete this comment?');"
+                   class="delete-btn-sm">
+                    Delete
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+</body>
+</html>

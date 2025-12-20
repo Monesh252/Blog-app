@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Post</title>
+
+    <link rel="stylesheet" th:href="@{/css/create.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <h1>Create New Post</h1>
+
+        <a href="/posts" class="back-btn">Back</a>
+    </header>
+
+    <div class="form-card">
+
+        <form method="post" th:action="@{/posts}" th:object="${post}">
+
+            <div class="field">
+                <label>Title</label>
+                <input th:field="*{title}">
+            </div>
+
+            <div class="field">
+                <label>Excerpt</label>
+                <input th:field="*{excerpt}">
+            </div>
+
+            <div class="field">
+                <label>Tags (comma separated)</label>
+                <input type="text" name="tagsInput"
+                       placeholder="example: java, spring, backend">
+            </div>
+
+            <div class="field">
+                <label>Content</label>
+                <textarea rows="6" th:field="*{content}"></textarea>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="save-btn">Save</button>
+                <a href="/posts" class="cancel-btn">Cancel</a>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>
