@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/posts")
@@ -211,8 +210,7 @@ public class PostController {
                 try {
                     from = LocalDate.parse(fromDate).atStartOfDay();
                 } catch (DateTimeParseException e2) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Invalid fromDate format. Use yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss");
+
                 }
             }
         }
@@ -224,8 +222,7 @@ public class PostController {
                 try {
                     to = LocalDate.parse(toDate).atTime(LocalTime.MAX);
                 } catch (DateTimeParseException e2) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Invalid toDate format. Use yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss");
+
                 }
             }
         }

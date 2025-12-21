@@ -5,13 +5,11 @@
     font-family:"Segoe UI", Roboto, Arial;
 }
 
-/* Plain white page */
 body{
     background:#ffffff;
     color:#000000;
 }
 
-/* Center content */
 .container{
     max-width:900px;
     margin:auto;
@@ -19,7 +17,6 @@ body{
     min-height:100vh;
 }
 
-/* Header */
 .header{
     display:flex;
     justify-content:space-between;
@@ -32,7 +29,6 @@ body{
     color:#000000;
 }
 
-/* Back Button */
 .back-btn{
     background:#000000;
     color:#ffffff;
@@ -43,7 +39,6 @@ body{
     border:1px solid #000;
 }
 
-/* Simple Form Card */
 .form-card{
     background:#ffffff;
     border:1px solid #000;
@@ -51,7 +46,6 @@ body{
     padding:25px;
 }
 
-/* Fields */
 .field{
     margin-bottom:18px;
     display:flex;
@@ -74,25 +68,21 @@ textarea{
     outline:none;
 }
 
-/* Placeholder */
 input::placeholder{
     color:#777;
 }
 
-/* No fancy focus highlight */
 input:focus,
 textarea:focus{
     border:1px solid #000;
 }
 
-/* Buttons row */
 .actions{
     margin-top:10px;
     display:flex;
     gap:10px;
 }
 
-/* Save Button */
 .save-btn{
     background:#000000;
     color:#ffffff;
@@ -103,7 +93,6 @@ textarea:focus{
     cursor:pointer;
 }
 
-/* Cancel Button */
 .cancel-btn{
     background:#ffffff;
     color:#000000;

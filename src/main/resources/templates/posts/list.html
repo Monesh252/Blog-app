@@ -14,7 +14,7 @@
             <a href="/posts/create" class="create-btn">+ Create Post</a>
         </div>
 
-        <h1 class="title">Blog Posts</h1>
+        <a th:href="@{/posts}" class="title"><h1>Blog Posts</h1></a>
 
         <div class="right">
             <form method="post" action="/">
@@ -42,7 +42,7 @@
             </div>
 
             <div class="sort-row">
-                <label>Sort:</label>
+                <label class="sort-name">Sort:</label>
                 <select name="sortBy" class="sort-select" onchange="this.form.submit()">
                     <option value="latest" th:selected="${sortBy == null or sortBy == 'latest'}">Latest First</option>
                     <option value="oldest" th:selected="${sortBy == 'oldest'}">Oldest First</option>

@@ -123,7 +123,6 @@ public class PostService {
             }
         }
 
-
         switch (type) {
             case "content":
                 return postRepository.findByContentContainingIgnoreCaseAndPublishedAtBetween(
@@ -140,7 +139,6 @@ public class PostService {
         }
 
     }
-
 
     public void delete(Long id){
         postRepository.deleteById(id);

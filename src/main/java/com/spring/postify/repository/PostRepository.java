@@ -14,20 +14,12 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    // Derived query methods without author filter
     Page<Post> findByTitleContainingIgnoreCaseAndPublishedAtBetween(
             String title, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
 
     Page<Post> findByContentContainingIgnoreCaseAndPublishedAtBetween(
             String content, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
 
-    // Derived query for author name search
-    Page<Post> findByAuthor_NameContainingIgnoreCaseAndPublishedAtBetween(
-            String authorName, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
-
-    // Derived query for tags search
-    Page<Post> findByTags_NameContainingIgnoreCaseAndPublishedAtBetween(
-            String tagName, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
 
     @Query("SELECT DISTINCT p.author FROM Post p ORDER BY p.author.name")
     List<User> findDistinctAuthors();
@@ -47,7 +39,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable);
 
-    // Content search with author filter - WITH COUNT QUERY
     @Query(value = "SELECT p FROM Post p WHERE " +
             "LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
             "p.author.id IN :authorIds AND " +
@@ -119,11 +110,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             Pageable pageable);
 
     @Query("""
-SELECT DISTINCT p FROM Post p
-JOIN p.tags t
-WHERE t.name IN :tags
-AND p.publishedAt BETWEEN :from AND :to
-""")
+        SELECT DISTINCT p FROM Post p
+        JOIN p.tags t
+        WHERE t.name IN :tags
+        AND p.publishedAt BETWEEN :from AND :to
+    """)
     Page<Post> filterByTags(
             @Param("tags") List<String> tags,
             @Param("from") LocalDateTime from,
@@ -133,12 +124,12 @@ AND p.publishedAt BETWEEN :from AND :to
 
 
     @Query("""
-SELECT DISTINCT p FROM Post p 
-JOIN p.tags t
-WHERE p.author.id IN :authorIds
-AND t.name IN :tags
-AND p.publishedAt BETWEEN :from AND :to
-""")
+        SELECT DISTINCT p FROM Post p 
+        JOIN p.tags t
+        WHERE p.author.id IN :authorIds
+        AND t.name IN :tags
+        AND p.publishedAt BETWEEN :from AND :to
+    """)
     Page<Post> filterByAuthorsAndTags(
             List<Long> authorIds,
             List<String> tags,
@@ -152,12 +143,12 @@ AND p.publishedAt BETWEEN :from AND :to
     List<String> findDistinctTags();
 
     @Query("""
-SELECT DISTINCT p FROM Post p
-JOIN p.tags t
-WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-AND t.name IN :tags
-AND p.publishedAt BETWEEN :from AND :to
-""")
+        SELECT DISTINCT p FROM Post p
+        JOIN p.tags t
+        WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        AND t.name IN :tags
+        AND p.publishedAt BETWEEN :from AND :to
+    """)
     Page<Post> searchTitleWithTags(
             @Param("keyword") String keyword,
             @Param("tags") List<String> tags,
@@ -167,12 +158,12 @@ AND p.publishedAt BETWEEN :from AND :to
     );
 
     @Query("""
-SELECT DISTINCT p FROM Post p
-JOIN p.tags t
-WHERE LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
-AND t.name IN :tags
-AND p.publishedAt BETWEEN :from AND :to
-""")
+        SELECT DISTINCT p FROM Post p
+        JOIN p.tags t
+        WHERE LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        AND t.name IN :tags
+        AND p.publishedAt BETWEEN :from AND :to
+    """)
     Page<Post> searchContentWithTags(
             @Param("keyword") String keyword,
             @Param("tags") List<String> tags,
@@ -182,12 +173,12 @@ AND p.publishedAt BETWEEN :from AND :to
     );
 
     @Query("""
-SELECT DISTINCT p FROM Post p
-JOIN p.tags t
-WHERE LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-AND t.name IN :tags
-AND p.publishedAt BETWEEN :from AND :to
-""")
+        SELECT DISTINCT p FROM Post p
+        JOIN p.tags t
+        WHERE LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        AND t.name IN :tags
+        AND p.publishedAt BETWEEN :from AND :to
+    """)
     Page<Post> searchAuthorWithTags(
             @Param("keyword") String keyword,
             @Param("tags") List<String> tags,
