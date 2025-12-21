@@ -63,7 +63,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable);
 
-    // Author name search with author filter - WITH COUNT QUERY
     @Query(value = "SELECT p FROM Post p WHERE " +
             "LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
             "p.author.id IN :authorIds AND " +
@@ -79,7 +78,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable);
 
-    // Tags search with author filter - WITH COUNT QUERY
     @Query(value = "SELECT DISTINCT p FROM Post p " +
             "JOIN p.tags t " +
             "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
@@ -97,7 +95,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable);
 
-    // Tags search without author filter - WITH COUNT QUERY
     @Query(value = "SELECT DISTINCT p FROM Post p " +
             "JOIN p.tags t " +
             "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
@@ -112,7 +109,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable);
 
-    // Alternative author name search (redundant - you already have derived query above)
     @Query("SELECT p FROM Post p WHERE " +
             "LOWER(p.author.name) LIKE LOWER(CONCAT('%', :authorName, '%')) AND " +
             "p.publishedAt BETWEEN :startDate AND :endDate")

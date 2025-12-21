@@ -197,7 +197,7 @@ body{
     display:flex;
     flex-direction:column;
     gap:10px;
-    max-height: 200px;
+    max-height: 100px;
     overflow-y: auto;
 }
 
