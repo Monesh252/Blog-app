@@ -1,6 +1,7 @@
 package com.spring.postify.repository;
 
 import com.spring.postify.entity.Post;
+import com.spring.postify.entity.Tag;
 import com.spring.postify.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +32,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT DISTINCT p.author FROM Post p ORDER BY p.author.name")
     List<User> findDistinctAuthors();
 
-    // Title search with author filter - WITH COUNT QUERY
     @Query(value = "SELECT p FROM Post p WHERE " +
             "LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
             "p.author.id IN :authorIds AND " +
@@ -117,5 +117,84 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
+
+    @Query("""
+SELECT DISTINCT p FROM Post p
+JOIN p.tags t
+WHERE t.name IN :tags
+AND p.publishedAt BETWEEN :from AND :to
+""")
+    Page<Post> filterByTags(
+            @Param("tags") List<String> tags,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable
+    );
+
+
+    @Query("""
+SELECT DISTINCT p FROM Post p 
+JOIN p.tags t
+WHERE p.author.id IN :authorIds
+AND t.name IN :tags
+AND p.publishedAt BETWEEN :from AND :to
+""")
+    Page<Post> filterByAuthorsAndTags(
+            List<Long> authorIds,
+            List<String> tags,
+            LocalDateTime from,
+            LocalDateTime to,
+            Pageable pageable
+    );
+
+
+    @Query("SELECT DISTINCT p.name FROM Tag p ORDER BY p.name")
+    List<String> findDistinctTags();
+
+    @Query("""
+SELECT DISTINCT p FROM Post p
+JOIN p.tags t
+WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+AND t.name IN :tags
+AND p.publishedAt BETWEEN :from AND :to
+""")
+    Page<Post> searchTitleWithTags(
+            @Param("keyword") String keyword,
+            @Param("tags") List<String> tags,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable
+    );
+
+    @Query("""
+SELECT DISTINCT p FROM Post p
+JOIN p.tags t
+WHERE LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+AND t.name IN :tags
+AND p.publishedAt BETWEEN :from AND :to
+""")
+    Page<Post> searchContentWithTags(
+            @Param("keyword") String keyword,
+            @Param("tags") List<String> tags,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable
+    );
+
+    @Query("""
+SELECT DISTINCT p FROM Post p
+JOIN p.tags t
+WHERE LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+AND t.name IN :tags
+AND p.publishedAt BETWEEN :from AND :to
+""")
+    Page<Post> searchAuthorWithTags(
+            @Param("keyword") String keyword,
+            @Param("tags") List<String> tags,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable
+    );
+
 
 }

@@ -76,7 +76,15 @@
                     </div>
                 </div>
 
-
+                <div class="filter-section">
+                    <label>Tags</label>
+                    <div class="tags-box">
+                        <input type="text"
+                               name="tags"
+                               placeholder="#spring #java #boot"
+                               th:value="${param.tags}">
+                    </div>
+                </div>
 
                 <div class="filter-section">
                     <label>From Date</label>

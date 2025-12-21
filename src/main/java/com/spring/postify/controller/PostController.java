@@ -45,22 +45,38 @@ public class PostController {
     public String listPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String tags,
             Model model) {
 
-        Page<Post> postPage = postService.getPosts(page, size);
-        List<User> authors = postService.getDistinctAuthorDetails();
-        System.out.println("Number of authors found: " + authors.size());
+        List<String> tagList = null;
 
+        if (tags != null && !tags.isBlank()) {
+            tagList = new ArrayList<>();
 
-        model.addAttribute("authors", authors);
+            String[] split = tags.split("#");
+            for (String s : split) {
+                if (s != null) {
+                    String trimmed = s.trim();
+                    if (!trimmed.isEmpty()) {
+                        tagList.add(trimmed);
+                    }
+                }
+            }
+        }
+
+        Page<Post> postPage = postService.getPostsFiltered(page, size, tagList);
+
+        model.addAttribute("authors", postService.getDistinctAuthorDetails());
         model.addAttribute("posts", postPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", postPage.getTotalPages());
         model.addAttribute("totalItems", postPage.getTotalElements());
         model.addAttribute("size", size);
+        model.addAttribute("tags", tags);
 
         return "posts/list";
     }
+
 
     @GetMapping("/{id}")
     public String view(@PathVariable Long id, Model model){
@@ -182,6 +198,7 @@ public class PostController {
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate,
             @RequestParam(required = false) String[] authorIds,
+            @RequestParam(required = false) String tags,
             Model model) {
 
         LocalDateTime from = null;
@@ -213,6 +230,23 @@ public class PostController {
             }
         }
 
+        List<String> tagList = null;
+
+        if (tags != null && !tags.isBlank()) {
+            tagList = new ArrayList<>();
+            String[] split = tags.split("#");
+
+            for (String s : split) {
+                s.trim();
+                if (s != null) {
+                    String trimmed = s.trim();
+                    if (!trimmed.isEmpty()) {
+                        tagList.add(trimmed);
+                    }
+                }
+            }
+        }
+
         List<User> authors = postService.getDistinctAuthorDetails();
 
         List<Long> selectedAuthorIds = new ArrayList<>();
@@ -228,7 +262,8 @@ public class PostController {
         }
 
         Page<Post> result = postService.search(type, keyword, page, size, sortBy, from, to,
-                            selectedAuthorIds.isEmpty() ? null : selectedAuthorIds);
+                            selectedAuthorIds.isEmpty() ? null : selectedAuthorIds,
+                            tagList);
 
         model.addAttribute("selectedAuthors", selectedAuthorIds);
         model.addAttribute("authors",authors);
