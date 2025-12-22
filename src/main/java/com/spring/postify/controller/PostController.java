@@ -8,11 +8,9 @@ import com.spring.postify.service.PostService;
 import com.spring.postify.service.TagService;
 import com.spring.postify.service.UserService;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,8 +62,9 @@ public class PostController {
         }
 
         Page<Post> postPage = postService.getPostsFiltered(page, size, tagList);
+        List<User> authors = postService.getDistinctAuthorDetails();
 
-        model.addAttribute("authors", postService.getDistinctAuthorDetails());
+        model.addAttribute("authors", authors);
         model.addAttribute("posts", postPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", postPage.getTotalPages());
@@ -245,7 +244,6 @@ public class PostController {
         }
 
         List<User> authors = postService.getDistinctAuthorDetails();
-
         List<Long> selectedAuthorIds = new ArrayList<>();
         if (authorIds != null && authorIds.length > 0) {
             for (String id : authorIds) {

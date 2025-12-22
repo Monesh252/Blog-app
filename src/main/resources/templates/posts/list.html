@@ -24,7 +24,6 @@
     </div>
 
     <form method="get" th:action="@{/posts/search}" class="main-form">
-
         <div class="search-area">
             <div class="search-row">
                 <select name="type" class="search-type">
@@ -50,13 +49,11 @@
                     <option value="author" th:selected="${sortBy == 'author'}">Author</option>
                 </select>
             </div>
-
         </div>
 
         <div class="layout">
             <aside class="filter-panel">
                 <h3>Filters</h3>
-
                 <div class="filter-section">
                     <label>Author</label>
                     <div class="author-box" th:if="${authors != null and !authors.isEmpty()}">
@@ -115,7 +112,7 @@
                     No posts found.
                 </div>
 
-                <section class="grid" th:unless="${#lists.isEmpty(posts)}">
+                <section class="grid" th:if="${!#lists.isEmpty(posts)}">
                     <article class="card" th:each="post : ${posts}">
                         <div class="card-header">
                             <h2 th:text="${post.title}"></h2>
