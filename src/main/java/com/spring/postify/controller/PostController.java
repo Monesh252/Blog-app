@@ -93,7 +93,7 @@ public class PostController {
     @PostMapping
     public String save(@ModelAttribute Post post,
                        @RequestParam(required = false) String tagsInput){
-        post.setAuthor(userService.getUser(17L));
+        post.setAuthor(userService.getUser(9L));
 
         Set<Tag> tags = new HashSet<>();
         if (tagsInput != null && !tagsInput.isBlank()) {
@@ -126,15 +126,12 @@ public class PostController {
 
         String existingTags = "";
         if (post.getTags() != null && !post.getTags().isEmpty()) {
-
             StringBuilder sb = new StringBuilder();
-
             for (Tag tag : post.getTags()) {
                 if (tag != null && tag.getName() != null) {
                     sb.append("#").append(tag.getName()).append(" ");
                 }
             }
-
             existingTags = sb.toString().trim();
         }
 
@@ -146,32 +143,31 @@ public class PostController {
 
     @PostMapping("/update/{id}")
     public String update(@PathVariable Long id,
-                         @ModelAttribute Post post,
+                         @ModelAttribute Post incoming,
                          @RequestParam(required = false) String tagsInput) {
 
+        Post existing = postService.getPost(id);
+
+        existing.setTitle(incoming.getTitle());
+        existing.setExcerpt(incoming.getExcerpt());
+        existing.setContent(incoming.getContent());
+
         Set<Tag> tags = new HashSet<>();
-
         if (tagsInput != null && !tagsInput.isBlank()) {
-
-            String[] splitTags = tagsInput.split("#");
-
-            for (String t : splitTags) {
-                if (t != null) {
-                    String trimmed = t.trim();
-                    if (!trimmed.isEmpty()) {
-                        Tag tag = tagService.getOrCreateTag(trimmed);
-                        tags.add(tag);
-                    }
+            String[] split = tagsInput.split("#");
+            for (String t : split) {
+                String trimmed = t.trim();
+                if (!trimmed.isEmpty()) {
+                    tags.add(tagService.getOrCreateTag(trimmed));
                 }
             }
         }
+        existing.setTags(tags);
 
-        post.setTags(tags);
-
-        postService.update(id, post);
-
+        postService.save(existing);
         return "redirect:/posts";
     }
+
 
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id){

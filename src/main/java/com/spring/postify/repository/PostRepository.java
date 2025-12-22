@@ -1,7 +1,6 @@
 package com.spring.postify.repository;
 
 import com.spring.postify.entity.Post;
-import com.spring.postify.entity.Tag;
 import com.spring.postify.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -138,10 +137,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             Pageable pageable
     );
 
-
-    @Query("SELECT DISTINCT p.name FROM Tag p ORDER BY p.name")
-    List<String> findDistinctTags();
-
     @Query("""
         SELECT DISTINCT p FROM Post p
         JOIN p.tags t
@@ -187,5 +182,23 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             Pageable pageable
     );
 
-
+    @Query("""
+SELECT p FROM Post p
+WHERE p.publishedAt BETWEEN :from AND :to
+AND (
+      LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      OR LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      OR EXISTS (
+           SELECT 1 FROM p.tags t
+           WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
+)
+""")
+    Page<Post> searchAll(
+            @Param("keyword") String keyword,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable
+    );
 }

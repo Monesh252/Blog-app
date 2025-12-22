@@ -316,6 +316,21 @@ body{
     pointer-events:none;
 }
 
+.filter-btn {
+    display: block;
+    width: 100%;
+    background: #000;
+    color: white !important;
+    padding: 10px 0;
+    border-radius: 8px;
+    border: none;
+    text-align: center;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 8px;
+}
+
 @media(max-width:900px){
     .layout{
         grid-template-columns:1fr;

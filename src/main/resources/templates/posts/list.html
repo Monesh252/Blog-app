@@ -27,7 +27,8 @@
         <div class="search-area">
             <div class="search-row">
                 <select name="type" class="search-type">
-                    <option value="title" th:selected="${type == null or type == 'title'}">Title</option>
+                    <option value="all" th:selected="${type == null or type == 'all'}">All</option>
+                    <option value="title" th:selected="${type == 'title'}">Title</option>
                     <option value="content" th:selected="${type == 'content'}">Content</option>
                     <option value="author" th:selected="${type == 'author'}">Author</option>
                     <option value="tags" th:selected="${type == 'tags'}">Tags</option>
@@ -103,7 +104,16 @@
 
                 <div class="filter-buttons">
                     <button type="submit" name="action" value="filter" class="filter-btn">Apply Filters</button>
-                    <button type="submit" name="action" value="clear" class="clear-btn">Clear Filters</button>
+                    <a th:href="@{/posts/search(
+                                page=${0},
+                                size=${size},
+                                type=${type},
+                                keyword=${keyword},
+                                sortBy=${sortBy}
+                        )}"
+                        class="filter-btn clear-btn">
+                        Clear Filters
+                    </a>
                 </div>
             </aside>
 

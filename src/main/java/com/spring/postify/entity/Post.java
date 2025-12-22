@@ -39,7 +39,7 @@ public class Post {
     )
     private Set<Tag> tags;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
     public Post(String title, String excerpt, String content, User author, LocalDateTime publishedAt,

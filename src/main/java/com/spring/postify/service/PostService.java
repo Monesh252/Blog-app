@@ -124,6 +124,8 @@ public class PostService {
         }
 
         switch (type) {
+            case "all":
+                return postRepository.searchAll(keyword, from, to, pageable);
             case "content":
                 return postRepository.findByContentContainingIgnoreCaseAndPublishedAtBetween(
                         keyword, from, to, pageable);
