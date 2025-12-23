@@ -1,7 +1,6 @@
 package com.spring.postify.controller;
 
 import com.spring.postify.entity.Post;
-import com.spring.postify.entity.Tag;
 import com.spring.postify.entity.User;
 import com.spring.postify.service.CommentService;
 import com.spring.postify.service.PostService;
@@ -12,14 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Controller
 @RequestMapping("/posts")
@@ -31,7 +24,7 @@ public class PostController {
     private final TagService tagService;
 
     public PostController(PostService postService, UserService userService,
-                          CommentService commentService, TagService tagService){
+                          CommentService commentService, TagService tagService) {
         this.postService = postService;
         this.userService = userService;
         this.commentService = commentService;
@@ -42,26 +35,9 @@ public class PostController {
     public String listPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String tags,
             Model model) {
 
-        List<String> tagList = null;
-
-        if (tags != null && !tags.isBlank()) {
-            tagList = new ArrayList<>();
-
-            String[] split = tags.split("#");
-            for (String s : split) {
-                if (s != null) {
-                    String trimmed = s.trim();
-                    if (!trimmed.isEmpty()) {
-                        tagList.add(trimmed);
-                    }
-                }
-            }
-        }
-
-        Page<Post> postPage = postService.getPostsFiltered(page, size, tagList);
+        Page<Post> postPage = postService.getPostsFiltered(page, size);
         List<User> authors = postService.getDistinctAuthorDetails();
 
         model.addAttribute("authors", authors);
@@ -70,74 +46,38 @@ public class PostController {
         model.addAttribute("totalPages", postPage.getTotalPages());
         model.addAttribute("totalItems", postPage.getTotalElements());
         model.addAttribute("size", size);
-        model.addAttribute("tags", tags);
 
         return "posts/list";
     }
 
-
     @GetMapping("/{id}")
-    public String view(@PathVariable Long id, Model model){
+    public String view(@PathVariable Long id, Model model) {
         model.addAttribute("post", postService.getPost(id));
         model.addAttribute("comments", commentService.getCommentsByPost(id));
-
         return "posts/view";
     }
 
     @GetMapping("/create")
-    public String createForm(Model model){
+    public String createForm(Model model) {
         model.addAttribute("post", new Post());
         return "posts/create";
     }
 
     @PostMapping
     public String save(@ModelAttribute Post post,
-                       @RequestParam(required = false) String tagsInput){
+                       @RequestParam(required = false) String tagsInput) {
         post.setAuthor(userService.getUser(9L));
-
-        Set<Tag> tags = new HashSet<>();
-        if (tagsInput != null && !tagsInput.isBlank()) {
-
-            String[] splitTags = tagsInput.split("#");
-
-            for (String t : splitTags) {
-                t = t.trim();
-                if (t != null) {
-                    String trimmed = t.trim();
-                    if (!trimmed.isEmpty()) {
-                        Tag tag = tagService.getOrCreateTag(trimmed);
-                        tags.add(tag);
-                    }
-                }
-            }
-
-            post.setTags(tags);
-
-            System.out.println(tags);
-        }
+        post.setTags(tagService.parseTags(tagsInput));
         postService.save(post);
         return "redirect:/posts";
     }
 
     @GetMapping("/edit/{id}")
-    public String editForm(@PathVariable Long id, Model model){
+    public String editForm(@PathVariable Long id, Model model) {
         Post post = postService.getPost(id);
+        String existingTags = tagService.formatTags(post.getTags());
         model.addAttribute("post", post);
-
-        String existingTags = "";
-        if (post.getTags() != null && !post.getTags().isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (Tag tag : post.getTags()) {
-                if (tag != null && tag.getName() != null) {
-                    sb.append("#").append(tag.getName()).append(" ");
-                }
-            }
-            existingTags = sb.toString().trim();
-        }
-
-
         model.addAttribute("tagsInput", existingTags);
-
         return "posts/edit";
     }
 
@@ -147,36 +87,23 @@ public class PostController {
                          @RequestParam(required = false) String tagsInput) {
 
         Post existing = postService.getPost(id);
-
         existing.setTitle(incoming.getTitle());
         existing.setExcerpt(incoming.getExcerpt());
         existing.setContent(incoming.getContent());
-
-        Set<Tag> tags = new HashSet<>();
-        if (tagsInput != null && !tagsInput.isBlank()) {
-            String[] split = tagsInput.split("#");
-            for (String t : split) {
-                String trimmed = t.trim();
-                if (!trimmed.isEmpty()) {
-                    tags.add(tagService.getOrCreateTag(trimmed));
-                }
-            }
-        }
-        existing.setTags(tags);
-
+        existing.setTags(tagService.parseTags(tagsInput));
         postService.save(existing);
+
         return "redirect:/posts";
     }
 
-
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Long id){
+    public String delete(@PathVariable Long id) {
         postService.delete(id);
         return "redirect:/posts";
     }
 
     @GetMapping("/createtag")
-    public String create(Model model){
+    public String create(Model model) {
         model.addAttribute("post", new Post());
         model.addAttribute("tags", tagService.getAllTags());
         return "posts/create";
@@ -184,6 +111,7 @@ public class PostController {
 
     @GetMapping("/search")
     public String searchResult(
+            @RequestParam(required = false) String action,
             @RequestParam String type,
             @RequestParam String keyword,
             @RequestParam(defaultValue = "latest") String sortBy,
@@ -195,76 +123,49 @@ public class PostController {
             @RequestParam(required = false) String tags,
             Model model) {
 
-        LocalDateTime from = null;
-        LocalDateTime to = null;
+        if ("search".equals(action) || "filter".equals(action)) page = 0;
 
-        if (fromDate != null && !fromDate.trim().isEmpty() && !fromDate.equalsIgnoreCase("null")) {
-            try {
-                from = LocalDateTime.parse(fromDate);
-            } catch (DateTimeParseException e) {
-                try {
-                    from = LocalDate.parse(fromDate).atStartOfDay();
-                } catch (DateTimeParseException e2) {
+        LocalDateTime from = postService.parseFromDate(fromDate);
+        LocalDateTime to = postService.parseToDate(toDate);
+        List<String> tagList = tagService.parseTagNames(tags);
+        if (tagList == null || tagList.isEmpty())
+            tagList = null;
 
-                }
-            }
-        }
-
-        if (toDate != null && !toDate.trim().isEmpty() && !toDate.equalsIgnoreCase("null")) {
-            try {
-                to = LocalDateTime.parse(toDate);
-            } catch (DateTimeParseException e) {
-                try {
-                    to = LocalDate.parse(toDate).atTime(LocalTime.MAX);
-                } catch (DateTimeParseException e2) {
-
-                }
-            }
-        }
-
-        List<String> tagList = null;
-
-        if (tags != null && !tags.isBlank()) {
-            tagList = new ArrayList<>();
-            String[] split = tags.split("#");
-
-            for (String s : split) {
-                s.trim();
-                if (s != null) {
-                    String trimmed = s.trim();
-                    if (!trimmed.isEmpty()) {
-                        tagList.add(trimmed);
-                    }
-                }
-            }
-        }
-
+        List<Long> selectedAuthorIds = postService.parseAuthorIds(authorIds);
         List<User> authors = postService.getDistinctAuthorDetails();
-        List<Long> selectedAuthorIds = new ArrayList<>();
-        if (authorIds != null && authorIds.length > 0) {
-            for (String id : authorIds) {
-                if (id != null && !id.trim().isEmpty() && !id.equals("null")) {
-                    try {
-                        selectedAuthorIds.add(Long.parseLong(id));
-                    } catch (NumberFormatException e) {
-                    }
-                }
-            }
-        }
 
-        Page<Post> result = postService.search(type, keyword, page, size, sortBy, from, to,
-                            selectedAuthorIds.isEmpty() ? null : selectedAuthorIds,
-                            tagList);
+        if (selectedAuthorIds == null || selectedAuthorIds.isEmpty())
+            selectedAuthorIds = null;
 
-        model.addAttribute("selectedAuthors", selectedAuthorIds);
-        model.addAttribute("authors",authors);
+        model.addAttribute("keyword", keyword);
+        keyword = (keyword == null || keyword.isBlank())
+                ? null
+                : "%" + keyword.toLowerCase() + "%";
+
+        Page<Post> result = postService.search(
+                type,
+                keyword,
+                page,
+                size,
+                sortBy,
+                from,
+                to,
+                selectedAuthorIds,
+                tagList
+        );
+
+        model.addAttribute("authors", authors);
         model.addAttribute("posts", result.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", result.getTotalPages());
         model.addAttribute("size", size);
         model.addAttribute("type", type);
-        model.addAttribute("keyword", keyword);
         model.addAttribute("sortBy", sortBy);
+        model.addAttribute("fromDate", from);
+        model.addAttribute("toDate", to);
+        model.addAttribute("tags", tags);
+        model.addAttribute("selectedAuthors", selectedAuthorIds);
+        model.addAttribute("totalItems", result.getTotalElements());
 
         return "posts/list";
     }

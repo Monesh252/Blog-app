@@ -20,6 +20,10 @@ public class CommentController {
         this.postService = postService;
     }
 
+    private Comment getComment(Long id) {
+        return commentService.get(id);
+    }
+
     @PostMapping("/add")
     public String addComment(
             @RequestParam Long postId,
@@ -42,7 +46,7 @@ public class CommentController {
 
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id){
-        Comment comment = commentService.get(id);
+        Comment comment = getComment(id);
         Long postId = comment.getPost().getId();
 
         commentService.delete(id);
@@ -52,7 +56,7 @@ public class CommentController {
 
     @GetMapping("/edit/{id}")
     public String editCommentForm(@PathVariable Long id, Model model){
-        Comment comment = commentService.get(id);
+        Comment comment = getComment(id);
         model.addAttribute("comment", comment);
         return "comments/edit";
     }
@@ -63,8 +67,7 @@ public class CommentController {
                                 @RequestParam String email,
                                 @RequestParam("comment") String commentText){
 
-        Comment comment = commentService.get(id);
-
+        Comment comment = getComment(id);
         comment.setName(name);
         comment.setEmail(email);
         comment.setComment(commentText);

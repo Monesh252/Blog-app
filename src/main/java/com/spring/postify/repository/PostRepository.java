@@ -13,192 +13,57 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    Page<Post> findByTitleContainingIgnoreCaseAndPublishedAtBetween(
-            String title, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
-
-    Page<Post> findByContentContainingIgnoreCaseAndPublishedAtBetween(
-            String content, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable);
-
-
     @Query("SELECT DISTINCT p.author FROM Post p ORDER BY p.author.name")
     List<User> findDistinctAuthors();
-
-    @Query(value = "SELECT p FROM Post p WHERE " +
-            "LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
-            "p.author.id IN :authorIds AND " +
-            "p.publishedAt BETWEEN :fromDate AND :toDate",
-            countQuery = "SELECT COUNT(p) FROM Post p WHERE " +
-                    "LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
-                    "p.author.id IN :authorIds AND " +
-                    "p.publishedAt BETWEEN :fromDate AND :toDate")
-    Page<Post> findByTitleContainingIgnoreCaseAndAuthorIdInAndPublishedAtBetween(
-            @Param("keyword") String keyword,
-            @Param("authorIds") List<Long> authorIds,
-            @Param("fromDate") LocalDateTime fromDate,
-            @Param("toDate") LocalDateTime toDate,
-            Pageable pageable);
-
-    @Query(value = "SELECT p FROM Post p WHERE " +
-            "LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
-            "p.author.id IN :authorIds AND " +
-            "p.publishedAt BETWEEN :fromDate AND :toDate",
-            countQuery = "SELECT COUNT(p) FROM Post p WHERE " +
-                    "LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
-                    "p.author.id IN :authorIds AND " +
-                    "p.publishedAt BETWEEN :fromDate AND :toDate")
-    Page<Post> findByContentContainingIgnoreCaseAndAuthorIdInAndPublishedAtBetween(
-            @Param("keyword") String keyword,
-            @Param("authorIds") List<Long> authorIds,
-            @Param("fromDate") LocalDateTime fromDate,
-            @Param("toDate") LocalDateTime toDate,
-            Pageable pageable);
-
-    @Query(value = "SELECT p FROM Post p WHERE " +
-            "LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
-            "p.author.id IN :authorIds AND " +
-            "p.publishedAt BETWEEN :fromDate AND :toDate",
-            countQuery = "SELECT COUNT(p) FROM Post p WHERE " +
-                    "LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%')) AND " +
-                    "p.author.id IN :authorIds AND " +
-                    "p.publishedAt BETWEEN :fromDate AND :toDate")
-    Page<Post> findByAuthorNameContainingIgnoreCaseAndAuthorIdInAndPublishedAtBetween(
-            @Param("keyword") String keyword,
-            @Param("authorIds") List<Long> authorIds,
-            @Param("fromDate") LocalDateTime fromDate,
-            @Param("toDate") LocalDateTime toDate,
-            Pageable pageable);
-
-    @Query(value = "SELECT DISTINCT p FROM Post p " +
-            "JOIN p.tags t " +
-            "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "AND p.author.id IN :authorIds " +
-            "AND p.publishedAt BETWEEN :fromDate AND :toDate",
-            countQuery = "SELECT COUNT(DISTINCT p) FROM Post p " +
-                    "JOIN p.tags t " +
-                    "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                    "AND p.author.id IN :authorIds " +
-                    "AND p.publishedAt BETWEEN :fromDate AND :toDate")
-    Page<Post> findByTagsNameContainingIgnoreCaseAndAuthorIdInAndPublishedAtBetween(
-            @Param("keyword") String keyword,
-            @Param("authorIds") List<Long> authorIds,
-            @Param("fromDate") LocalDateTime fromDate,
-            @Param("toDate") LocalDateTime toDate,
-            Pageable pageable);
-
-    @Query(value = "SELECT DISTINCT p FROM Post p " +
-            "JOIN p.tags t " +
-            "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "AND p.publishedAt BETWEEN :fromDate AND :toDate",
-            countQuery = "SELECT COUNT(DISTINCT p) FROM Post p " +
-                    "JOIN p.tags t " +
-                    "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                    "AND p.publishedAt BETWEEN :fromDate AND :toDate")
-    Page<Post> findByTagsNameContainingIgnoreCaseAndPublishedAtBetween(
-            @Param("keyword") String keyword,
-            @Param("fromDate") LocalDateTime fromDate,
-            @Param("toDate") LocalDateTime toDate,
-            Pageable pageable);
-
-    @Query("SELECT p FROM Post p WHERE " +
-            "LOWER(p.author.name) LIKE LOWER(CONCAT('%', :authorName, '%')) AND " +
-            "p.publishedAt BETWEEN :startDate AND :endDate")
-    Page<Post> findByAuthorNameContainingIgnoreCaseAndPublishedAtBetween(
-            @Param("authorName") String authorName,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate,
-            Pageable pageable);
-
-    @Query("""
-        SELECT DISTINCT p FROM Post p
-        JOIN p.tags t
-        WHERE t.name IN :tags
-        AND p.publishedAt BETWEEN :from AND :to
-    """)
-    Page<Post> filterByTags(
-            @Param("tags") List<String> tags,
-            @Param("from") LocalDateTime from,
-            @Param("to") LocalDateTime to,
-            Pageable pageable
-    );
-
 
     @Query("""
         SELECT DISTINCT p FROM Post p 
         JOIN p.tags t
-        WHERE p.author.id IN :authorIds
-        AND t.name IN :tags
-        AND p.publishedAt BETWEEN :from AND :to
     """)
-    Page<Post> filterByAuthorsAndTags(
-            List<Long> authorIds,
-            List<String> tags,
-            LocalDateTime from,
-            LocalDateTime to,
-            Pageable pageable
-    );
+    Page<Post> listPosts(Pageable pageable);
 
     @Query("""
-        SELECT DISTINCT p FROM Post p
-        JOIN p.tags t
-        WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        AND t.name IN :tags
-        AND p.publishedAt BETWEEN :from AND :to
-    """)
-    Page<Post> searchTitleWithTags(
-            @Param("keyword") String keyword,
-            @Param("tags") List<String> tags,
-            @Param("from") LocalDateTime from,
-            @Param("to") LocalDateTime to,
-            Pageable pageable
-    );
-
-    @Query("""
-        SELECT DISTINCT p FROM Post p
-        JOIN p.tags t
-        WHERE LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        AND t.name IN :tags
-        AND p.publishedAt BETWEEN :from AND :to
-    """)
-    Page<Post> searchContentWithTags(
-            @Param("keyword") String keyword,
-            @Param("tags") List<String> tags,
-            @Param("from") LocalDateTime from,
-            @Param("to") LocalDateTime to,
-            Pageable pageable
-    );
-
-    @Query("""
-        SELECT DISTINCT p FROM Post p
-        JOIN p.tags t
-        WHERE LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        AND t.name IN :tags
-        AND p.publishedAt BETWEEN :from AND :to
-    """)
-    Page<Post> searchAuthorWithTags(
-            @Param("keyword") String keyword,
-            @Param("tags") List<String> tags,
-            @Param("from") LocalDateTime from,
-            @Param("to") LocalDateTime to,
-            Pageable pageable
-    );
-
-    @Query("""
-SELECT p FROM Post p
-WHERE p.publishedAt BETWEEN :from AND :to
-AND (
-      LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-      OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
-      OR LOWER(p.author.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-      OR EXISTS (
-           SELECT 1 FROM p.tags t
-           WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-      )
-)
-""")
-    Page<Post> searchAll(
+            SELECT p FROM Post p
+            WHERE p.publishedAt BETWEEN :from AND :to
+            AND (:authorIds IS NULL OR p.author.id IN :authorIds)
+            AND (
+                :tagList IS NULL
+                OR EXISTS (
+                    SELECT 1 FROM p.tags t2
+                    WHERE LOWER(t2.name) IN :tagList
+                )
+            )
+            AND (
+                :keyword IS NULL
+                OR (
+                    (:type = 'all' AND (
+                        LOWER(p.title) LIKE :keyword
+                     OR LOWER(p.content) LIKE :keyword
+                     OR LOWER(p.author.name) LIKE :keyword
+                     OR EXISTS (
+                            SELECT 1 FROM p.tags t3
+                            WHERE LOWER(t3.name) LIKE :keyword
+                     )
+                    ))
+                    OR (:type = 'title'   AND LOWER(p.title) LIKE :keyword)
+                    OR (:type = 'content' AND LOWER(p.content) LIKE :keyword)
+                    OR (:type = 'author'  AND LOWER(p.author.name) LIKE :keyword)
+                    OR (:type = 'tags' AND EXISTS(
+                            SELECT 1 FROM p.tags t4
+                            WHERE LOWER(t4.name) LIKE :keyword
+                    ))
+                )
+            )
+            """)
+    Page<Post> searchEverything(
+            @Param("type") String type,
             @Param("keyword") String keyword,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
+            @Param("authorIds") List<Long> authorIds,
+            @Param("tagList") List<String> tagList,
             Pageable pageable
     );
+
+
 }
