@@ -30,6 +30,8 @@ body{
 .login-card h1{
     color:#000000;
     margin-bottom:20px;
+    font-size:26px;
+    font-weight:700;
 }
 
 .field{
@@ -52,6 +54,7 @@ input{
     padding:10px;
     border-radius:6px;
     outline:none;
+    font-weight:600;
 }
 
 input::placeholder{
@@ -77,6 +80,7 @@ input::placeholder{
 .no-account{
     color:#000000;
     margin-bottom:8px;
+    font-weight:600;
 }
 
 .create-btn{
@@ -88,4 +92,15 @@ input::placeholder{
     font-weight:700;
     text-decoration:none;
     border:1px solid #000000;
+    margin:5px;
+}
+
+.alert{
+    border:1px solid #000000;
+    background:#ffffff;
+    color:#000000;
+    padding:10px;
+    border-radius:6px;
+    margin-bottom:10px;
+    font-weight:700;
 }

@@ -16,9 +16,18 @@
 
         <div class="top-actions">
             <a href="/posts" class="back-btn">Back</a>
-            <a th:href="@{'/posts/edit/' + ${post.id}}" class="edit-btn">Edit</a>
-            <a th:href="@{'/posts/delete/' + ${post.id}}"
-               onclick="return confirm('Delete Post?');"
+
+            <a th:if="${(post.author != null and post.author.email == #authentication.name)
+                                      or #authorization.expression('hasRole(''ADMIN'')')}"
+               th:href="@{'/posts/edit/' + ${post.id}}"
+               class="edit-btn">
+                Edit
+            </a>
+
+            <a th:if="${(post.author != null and post.author.email == #authentication.name)
+                                      or #authorization.expression('hasRole(''ADMIN'')')}"
+               th:href="@{'/posts/delete/' + ${post.id}}"
+               onclick="return confirm('Are you sure?');"
                class="delete-btn">
                 Delete
             </a>
@@ -26,7 +35,6 @@
     </header>
 
 
-    <!-- POST CARD -->
     <div class="post-card">
 
         <div class="meta">
@@ -42,27 +50,30 @@
     </div>
 
 
-    <!-- ADD COMMENT -->
     <section class="add-comment">
         <h3>Add Comment</h3>
 
         <form method="post" action="/comments/add">
 
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
             <input type="hidden" name="postId" th:value="${post.id}">
 
             <div class="field">
                 <label>Name</label>
-                <input name="name">
+                <input name="name" required>
             </div>
 
             <div class="field">
                 <label>Email</label>
-                <input name="email">
+                <input name="email" type="email" required>
             </div>
 
             <div class="field">
                 <label>Comment</label>
-                <textarea name="comment"></textarea>
+                <textarea name="comment" required></textarea>
             </div>
 
             <button type="submit" class="submit-btn">Submit</button>
@@ -72,7 +83,6 @@
 
     <br>
 
-    <!-- COMMENTS SECTION -->
     <section class="comments" id="comment">
 
         <h2>Comments</h2>
@@ -91,12 +101,17 @@
             <p th:text="${c.comment}"></p>
 
             <div class="comment-actions">
+                <div th:if="${
+                        (post.author != null and post.author.email == #authentication.name)
+                        or #authorization.expression('hasRole(''ADMIN'')')
+                        }">
                 <a th:href="@{'/comments/edit/' + ${c.id}}" class="edit-btn-sm">Edit</a>
                 <a th:href="@{'/comments/delete/' + ${c.id}}"
                    onclick="return confirm('Delete this comment?');"
                    class="delete-btn-sm">
                     Delete
                 </a>
+                </div>
             </div>
 
         </div>

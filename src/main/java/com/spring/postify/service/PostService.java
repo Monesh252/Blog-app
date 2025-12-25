@@ -1,7 +1,6 @@
 package com.spring.postify.service;
 
 import com.spring.postify.entity.Post;
-import com.spring.postify.entity.Tag;
 import com.spring.postify.entity.User;
 import com.spring.postify.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class PostService {
@@ -104,54 +101,6 @@ public class PostService {
         return postRepository.listPosts(pageable);
     }
 
-    public List<String> splitStringTags(String tags) {
-        if (tags == null || tags.isBlank())
-            return List.of();
-
-        List<String> list = new ArrayList<>();
-        for (String t : tags.split("#")) {
-            String trimmed = t.trim();
-            if (!trimmed.isEmpty()) list.add(trimmed);
-        }
-        return list;
-    }
-
-    public Set<Tag> parseTags(String tagsInput) {
-
-        Set<Tag> tags = new HashSet<>();
-
-        if (tagsInput == null || tagsInput.isBlank())
-            return tags;
-
-        for (String t : tagsInput.split("#")) {
-            String trimmed = t.trim();
-            if (!trimmed.isEmpty()) {
-                tags.add(tagService.getOrCreateTag(trimmed));
-            }
-        }
-
-        return tags;
-    }
-
-    public String formatTags(Set<Tag> tags) {
-
-        if (tags == null || tags.isEmpty())
-            return "";
-
-        StringBuilder sb = new StringBuilder();
-
-        for (Tag tag : tags) {
-            if (tag != null && tag.getName() != null) {
-                sb.append("#")
-                        .append(tag.getName().trim())
-                        .append(" ");
-            }
-        }
-
-        return sb.toString().trim();
-    }
-
-
     public LocalDateTime parseFromDate(String fromDate) {
 
         if (fromDate == null || fromDate.isBlank() || fromDate.equalsIgnoreCase("null"))
@@ -182,28 +131,6 @@ public class PostService {
                 return null;
             }
         }
-    }
-
-    public List<String> parseTagNames(String input) {
-
-        List<String> result = new ArrayList<>();
-
-        if (input == null || input.isBlank() || "null".equalsIgnoreCase(input)) {
-            return result;   // return empty list
-        }
-
-        String[] parts = input.split("#");
-
-        for (String s : parts) {
-            if (s != null) {
-                String trimmed = s.trim();
-                if (!trimmed.isEmpty()) {
-                    result.add(trimmed.toLowerCase());
-                }
-            }
-        }
-
-        return result;
     }
 
     public List<Long> parseAuthorIds(String[] authorIds) {

@@ -2,7 +2,6 @@ package com.spring.postify.service;
 
 import com.spring.postify.entity.Tag;
 import com.spring.postify.repository.TagRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

@@ -30,6 +30,8 @@ public class UserController {
 
     @PostMapping
     public String save(@ModelAttribute User user){
+        user.setPassword("{noop}"+user.getPassword());
+        user.setRole("ROLE_AUTHOR");
         userService.save(user);
         return "users/success";
     }

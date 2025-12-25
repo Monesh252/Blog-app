@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"><head>
     <meta charset="UTF-8">
     <title>Blog Posts</title>
     <link rel="stylesheet" th:href="@{/css/list.css}">
@@ -13,7 +13,15 @@
     <div class="header">
 
         <div class="left">
-            <a href="/posts/create" class="create-btn">+ Create Post</a>
+            <span sec:authorize="isAnonymous()" style="visibility:hidden">
+                placeholder
+            </span>
+
+            <a href="/posts/create"
+               class="create-btn"
+               sec:authorize="isAuthenticated()">
+                + Create Post
+            </a>
         </div>
 
         <a th:href="@{/posts}" class="title">
@@ -21,12 +29,21 @@
         </a>
 
         <div class="right">
-            <form method="post" action="/">
+
+            <form method="post"
+                  th:action="@{/logout}"
+                  sec:authorize="isAuthenticated()">
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
+
+            <a href="/" class="logout-btn" sec:authorize="isAnonymous()">
+                Login
+            </a>
+
         </div>
 
     </div>
+
 
     <form method="get" th:action="@{/posts/search}" class="main-form">
 
@@ -245,12 +262,16 @@
                                 View
                             </a>
 
-                            <a th:href="@{'/posts/edit/' + ${post.id}}"
+                            <a th:if="${(post.author != null and post.author.email == #authentication.name)
+                                      or #authorization.expression('hasRole(''ADMIN'')')}"
+                               th:href="@{'/posts/edit/' + ${post.id}}"
                                class="btn edit">
                                 Edit
                             </a>
 
-                            <a th:href="@{'/posts/delete/' + ${post.id}}"
+                            <a th:if="${(post.author != null and post.author.email == #authentication.name)
+                                      or #authorization.expression('hasRole(''ADMIN'')')}"
+                               th:href="@{'/posts/delete/' + ${post.id}}"
                                onclick="return confirm('Are you sure?');"
                                class="btn delete">
                                 Delete
@@ -268,14 +289,14 @@
                     <a class="page-btn"
                        th:classappend="${currentPage == 0} ? 'disabled' : ''"
                        th:href="@{/posts/search(page=${currentPage-1},
-    size=${size},
-    type=${type != null ? type : 'all'},
-    keyword=${keyword != null ? keyword : ''},
-    sortBy=${sortBy != null ? sortBy : 'latest'},
-    fromDate=${fromDate},
-    toDate=${toDate},
-    authorIds=${selectedAuthors},
-    tags=${tags})}"
+                                size=${size},
+                                type=${type != null ? type : 'all'},
+                                keyword=${keyword != null ? keyword : ''},
+                                sortBy=${sortBy != null ? sortBy : 'latest'},
+                                fromDate=${fromDate},
+                                toDate=${toDate},
+                                authorIds=${selectedAuthors},
+                                tags=${tags})}"
                     >
                        Previous
                     </a>
@@ -285,14 +306,14 @@
                            th:classappend="${i == currentPage} ? 'active' : ''"
                            th:text="${i+1}"
                            th:href="@{/posts/search(page=${i},
-    size=${size},
-    type=${type != null ? type : 'all'},
-    keyword=${keyword != null ? keyword : ''},
-    sortBy=${sortBy != null ? sortBy : 'latest'},
-    fromDate=${fromDate},
-    toDate=${toDate},
-    authorIds=${selectedAuthors},
-    tags=${tags})}"
+                                    size=${size},
+                                    type=${type != null ? type : 'all'},
+                                    keyword=${keyword != null ? keyword : ''},
+                                    sortBy=${sortBy != null ? sortBy : 'latest'},
+                                    fromDate=${fromDate},
+                                    toDate=${toDate},
+                                    authorIds=${selectedAuthors},
+                                    tags=${tags})}"
                         >
                         </a>
                     </span>
@@ -301,14 +322,14 @@
                        th:classappend="${currentPage + 1 == totalPages}
                                        ? 'disabled' : ''"
                        th:href="@{/posts/search(page=${currentPage+1},
-    size=${size},
-    type=${type != null ? type : 'all'},
-    keyword=${keyword != null ? keyword : ''},
-    sortBy=${sortBy != null ? sortBy : 'latest'},
-    fromDate=${fromDate},
-    toDate=${toDate},
-    authorIds=${selectedAuthors},
-    tags=${tags})}"
+                                size=${size},
+                                type=${type != null ? type : 'all'},
+                                keyword=${keyword != null ? keyword : ''},
+                                sortBy=${sortBy != null ? sortBy : 'latest'},
+                                fromDate=${fromDate},
+                                toDate=${toDate},
+                                authorIds=${selectedAuthors},
+                                tags=${tags})}"
 
                     >
                         Next

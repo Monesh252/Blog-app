@@ -18,7 +18,9 @@ public class User {
 
     private String password;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    private String role;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE)
     private List<Post> posts;
 
     public User(String name, String email, String password) {
@@ -61,6 +63,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public List<Post> getPosts() {

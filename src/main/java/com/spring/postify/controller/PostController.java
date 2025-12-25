@@ -7,6 +7,8 @@ import com.spring.postify.service.PostService;
 import com.spring.postify.service.TagService;
 import com.spring.postify.service.UserService;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -59,18 +61,40 @@ public class PostController {
 
     @GetMapping("/create")
     public String createForm(Model model) {
+        List<User> authors = postService.getDistinctAuthorDetails();
+
         model.addAttribute("post", new Post());
+        model.addAttribute("authors", authors);
         return "posts/create";
     }
 
     @PostMapping
     public String save(@ModelAttribute Post post,
-                       @RequestParam(required = false) String tagsInput) {
-        post.setAuthor(userService.getUser(9L));
+                       @RequestParam(required = false) String tagsInput,
+                       @RequestParam(required = false) Long authorId) {
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))
+                && authorId != null) {
+
+            post.setAuthor(userService.getUser(authorId));
+
+        } else {
+            post.setAuthor(userService.getUserByEmail(email));
+        }
+
         post.setTags(tagService.parseTags(tagsInput));
         postService.save(post);
+
         return "redirect:/posts";
     }
+
 
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Long id, Model model) {

@@ -15,16 +15,29 @@
 
         <h1>Login</h1>
 
-        <form method="get" th:action="@{/posts}">
+        <div th:if="${param.error}" class="alert">
+            Invalid username / password!
+        </div>
+
+        <div th:if="${param.logout}" class="alert">
+            Logged out successfully.
+        </div>
+
+
+        <form method="post" th:action="@{/authenticateUser}">
+
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}"/>
 
             <div class="field">
                 <label>Email</label>
-                <input name="email" placeholder="Enter your email">
+                <input name="username" placeholder="Enter your email" required>
             </div>
 
             <div class="field">
                 <label>Password</label>
-                <input type="password" name="password" placeholder="Enter password">
+                <input type="password" name="password" placeholder="Enter password" required>
             </div>
 
             <button type="submit" class="login-btn">Login</button>
@@ -33,7 +46,9 @@
         <div class="divider"></div>
 
         <p class="no-account">Don’t have an account?</p>
+
         <a href="/users/create" class="create-btn">Create Account</a>
+        <a href="/posts" class="create-btn">Continue Without Login</a>
 
     </div>
 

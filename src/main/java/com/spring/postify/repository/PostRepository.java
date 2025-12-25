@@ -64,6 +64,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("tagList") List<String> tagList,
             Pageable pageable
     );
-
-
 }
